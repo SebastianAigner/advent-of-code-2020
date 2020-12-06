@@ -8,10 +8,7 @@ val groups = File("inputs/day6.txt")
 
 // Treat whole group as a set to remove duplicates
 fun partOne() {
-    val count = groups
-        .map { it.replace("\n", "").toSet() }
-        .sumBy { it.count() }
-    println(count)
+    println(groups.sumBy { it.replace("\n", "").toSet().count() })
 }
 
 // Build per-group intersection
