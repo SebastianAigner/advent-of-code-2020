@@ -6,7 +6,7 @@ val tickets = File("inputs/day5.txt").readLines().map(::parseTicket).sorted()
 
 fun main() {
     println(tickets.last())
-    println(tickets.windowed(2).first { it[0] + 1 != it[1] }[0] + 1)
+    println(tickets.zipWithNext().first { it.first + 1 != it.second }.first + 1)
 }
 
 // Row & Col are binary-encoded with F,L=0 and B,R=1
