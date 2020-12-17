@@ -44,6 +44,8 @@ fun main() {
             instructionAtIndex.opcode = "nop"
         } else if (instructionAtIndex.opcode == "nop") {
             instructionAtIndex.opcode = "jmp"
+        } else {
+            return@repeat
         }
         if (executeCode(thisInput)) {
             println("DONE")
