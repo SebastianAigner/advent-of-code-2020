@@ -38,14 +38,14 @@ fun executeCode(instructions: List<Instruction>): Boolean {
 fun main() {
     println("terminates=" + executeCode(defaultInput))
     repeat(defaultInput.size) {
-        val instructionAtIndex = defaultInput.get(it)
+        val thisInput = defaultInput.toList().map { it.copy() }
+        val instructionAtIndex = thisInput[it]
         if (instructionAtIndex.opcode == "jmp") {
             instructionAtIndex.opcode = "nop"
         } else if (instructionAtIndex.opcode == "nop") {
             instructionAtIndex.opcode = "jmp"
         }
-        val modifiedProgram = defaultInput.toMutableList().apply { set(it, instructionAtIndex) }
-        if (executeCode(modifiedProgram)) {
+        if (executeCode(thisInput)) {
             println("DONE")
             return
         }
