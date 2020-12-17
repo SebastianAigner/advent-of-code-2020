@@ -2,24 +2,25 @@ package day8
 
 import java.io.File
 
-val input = File("inputs/day8.txt").readLines().map {
+val defaultInput = File("inputs/day8.txt").readLines().map {
     val (instr, value) = it.split(" ")
     Instruction(instr, value.toInt())
 }
 
-data class Instruction(val opcode: String, val value: Int)
+data class Instruction(var opcode: String, val value: Int)
 
-fun main() {
+fun executeCode(instructions: List<Instruction>): Boolean {
     var ip = 0
     var acc = 0
     val encounteredIndices = mutableListOf<Int>()
     while (true) {
         if (ip in encounteredIndices) {
             println(acc)
-            break
+            return false
         }
         encounteredIndices += ip
-        val currInst = input[ip]
+        println(acc)
+        val currInst = instructions.getOrNull(ip) ?: return true // program terminates
         when (currInst.opcode) {
             "nop" -> {
                 ip++
@@ -30,6 +31,23 @@ fun main() {
             "jmp" -> {
                 ip += currInst.value
             }
+        }
+    }
+}
+
+fun main() {
+    println("terminates=" + executeCode(defaultInput))
+    repeat(defaultInput.size) {
+        val instructionAtIndex = defaultInput.get(it)
+        if (instructionAtIndex.opcode == "jmp") {
+            instructionAtIndex.opcode = "nop"
+        } else if (instructionAtIndex.opcode == "nop") {
+            instructionAtIndex.opcode = "jmp"
+        }
+        val modifiedProgram = defaultInput.toMutableList().apply { set(it, instructionAtIndex) }
+        if (executeCode(modifiedProgram)) {
+            println("DONE")
+            return
         }
     }
 }
