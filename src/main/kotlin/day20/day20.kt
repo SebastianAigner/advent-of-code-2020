@@ -12,7 +12,6 @@ data class Tile(val id: Int, val content: List<String>) {
         return copy(content = content.map { it.reversed() })
     }
 
-    @ExperimentalStdlibApi
     fun rot90(): Tile {
         val newLines = mutableListOf<String>()
         repeat(this.content.count()) {
@@ -26,12 +25,10 @@ data class Tile(val id: Int, val content: List<String>) {
         return copy(content = newLines)
     }
 
-    @ExperimentalStdlibApi
     fun rot180(): Tile {
         return this.rot90().rot90()
     }
 
-    @ExperimentalStdlibApi
     fun rot270(): Tile {
         return this.rot180().rot90()
     }
@@ -41,7 +38,6 @@ data class Tile(val id: Int, val content: List<String>) {
     }
 
 
-    @OptIn(ExperimentalStdlibApi::class)
     val rotationOperations: List<(Tile) -> Tile> = listOf(
         Tile::identity,
         Tile::rot90,
