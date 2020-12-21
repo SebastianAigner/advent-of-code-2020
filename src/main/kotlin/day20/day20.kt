@@ -2,6 +2,7 @@ package day20
 
 import java.io.File
 import kotlin.math.sqrt
+import kotlin.system.exitProcess
 
 data class Tile(val id: Int, val content: List<String>) {
     fun flipX(): Tile {
@@ -104,7 +105,7 @@ data class Tile(val id: Int, val content: List<String>) {
     }
 }
 
-val tiles = File("inputs/day20demo.txt").readText().trim().split("\n\n").map {
+val tiles = File("inputs/day20.txt").readText().trim().split("\n\n").map {
     val lines = it.lines()
     val id = lines.first().removePrefix("Tile ").removeSuffix(":").toInt()
     val tileContents = lines.drop(1)
@@ -122,13 +123,19 @@ fun compose(a: (Tile) -> Tile, b: (Tile) -> Tile): (Tile) -> Tile {
 
 @ExperimentalStdlibApi
 fun main() {
-
+    newFill(Grid(mapOf()), tiles)
+    println(length)
 }
 
 fun newFill(grid: Grid, candidateTiles: List<Tile>) {
+//    println(candidateTiles.map { it.id }.joinToString(", "))
+//    println(grid.content.map { it.value.id }.joinToString())
     val firstOpenSquare = grid.getFirstOpenCoordinate()
+//    println("First open at $firstOpenSquare")
     if (firstOpenSquare == null || candidateTiles.count() == 0) {
         println(grid)
+        grid.getCornerValues()
+        exitProcess(0)
         return
     }
     // let's find things that fit.
@@ -137,7 +144,6 @@ fun newFill(grid: Grid, candidateTiles: List<Tile>) {
     for (candidate in candidateTiles) {
         val fittingPermutationsForCandidate = candidate.matchesInNeighborhood(above, left)
         for (permutatedTile in fittingPermutationsForCandidate) {
-            println("found candidate")
             // they fit, so we put them in the grid, and run the whole show again
             val newGrid = grid.add(firstOpenSquare, permutatedTile)
             // but first we remove the candidate
@@ -145,7 +151,6 @@ fun newFill(grid: Grid, candidateTiles: List<Tile>) {
             newFill(newGrid, newCandidates)
         }
     }
-    println("ran through")
 }
 
 fun floodFill(grid: Grid, candidateTiles: List<Tile>) {
@@ -187,26 +192,24 @@ data class Grid(val content: Map<Vec2, Tile>) {
     fun add(v: Vec2, tile: Tile): Grid {
         val mut = content.toMutableMap()
         mut[v] = tile
-//        val ids = content.values.map { it.id }.toSet()
-//        if(ids.count() != content.values.count()) {
-//            println("fuck")
-//            System.exit(-1)
-//        }
         return Grid(mut)
     }
 
     fun getAbove(v: Vec2): Tile? {
-        return content.get(Vec2(v.x, v.y - 1))
+        return content[Vec2(v.x, v.y - 1)]
     }
 
     fun getLeft(v: Vec2): Tile? {
-        return content.get(Vec2(v.x - 1, v.y))
+        return content[Vec2(v.x - 1, v.y)]
     }
 
     fun getFirstOpenCoordinate(): Vec2? {
-        for (y in 0..length) {
-            for (x in 0..length) {
-                if (content.get(Vec2(x, y)) == null) return Vec2(x, y)
+        for (y in 0 until length) {
+            for (x in 0 until length) {
+//                println(content[Vec2(x, y)])
+                if (content[Vec2(x, y)] == null) {
+                    return Vec2(x, y)
+                }
             }
         }
         return null
@@ -214,8 +217,8 @@ data class Grid(val content: Map<Vec2, Tile>) {
 
     fun getCornerValues() {
         println(content[Vec2(0, 0)])
-        println(content[Vec2(0, 11)])
-        println(content[Vec2(11, 0)])
-        println(content[Vec2(11, 11)])
+        println(content[Vec2(0, length - 1)])
+        println(content[Vec2(length - 1, 0)])
+        println(content[Vec2(length - 1, length - 1)])
     }
 }
