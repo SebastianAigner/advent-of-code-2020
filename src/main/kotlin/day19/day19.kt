@@ -12,7 +12,8 @@ val rules = File("inputs/day19.txt").readLines().takeWhile { it.isNotBlank() }.s
 val testStrings = File("inputs/day19.txt").readLines().takeLastWhile { it.isNotBlank() }
 
 fun main() {
-
+    partOne()
+    partTwo()
 }
 
 fun partTwo() {
