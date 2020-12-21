@@ -2,12 +2,25 @@ package day20
 
 import java.io.File
 import kotlin.math.sqrt
-import kotlin.system.exitProcess
 
 data class Tile(val id: Int, val content: List<String>) {
     fun flipX(): Tile {
         return copy(content = this.content.reversed())
     }
+
+    /*
+    1 2  2 1  3 4
+    3 4  4 3  1 2
+
+    3 1  1 3
+    4 2  4 2
+
+    4 3  3 4
+    2 1  1 2
+
+    2 4  4 2
+    1 3  1 3
+     */
 
     fun flipY(): Tile {
         return copy(content = content.map { it.reversed() })
@@ -48,7 +61,7 @@ data class Tile(val id: Int, val content: List<String>) {
 
     val flipOperations: List<(Tile) -> Tile> = listOf(
         Tile::identity,
-        Tile::flipX,
+//        Tile::flipX,
         Tile::flipY
     )
 
@@ -123,65 +136,35 @@ fun compose(a: (Tile) -> Tile, b: (Tile) -> Tile): (Tile) -> Tile {
 
 @ExperimentalStdlibApi
 fun main() {
-    newFill(Grid(mapOf()), tiles)
+    newFill(Grid(mapOf()), tiles, true)
     println(length)
 }
 
-fun newFill(grid: Grid, candidateTiles: List<Tile>) {
-//    println(candidateTiles.map { it.id }.joinToString(", "))
-//    println(grid.content.map { it.value.id }.joinToString())
+fun newFill(grid: Grid, candidateTiles: List<Tile>, shouldPrint: Boolean = false): Boolean {
     val firstOpenSquare = grid.getFirstOpenCoordinate()
-//    println("First open at $firstOpenSquare")
     if (firstOpenSquare == null || candidateTiles.count() == 0) {
-        println(grid)
-        grid.getCornerValues()
-        exitProcess(0)
-        return
+        println(grid.getCornerValues())
+        return true
     }
     // let's find things that fit.
     val above = grid.getAbove(firstOpenSquare)
     val left = grid.getLeft(firstOpenSquare)
     for (candidate in candidateTiles) {
+        if (shouldPrint) {
+            println("Checking ${candidate.id}...")
+        }
         val fittingPermutationsForCandidate = candidate.matchesInNeighborhood(above, left)
         for (permutatedTile in fittingPermutationsForCandidate) {
             // they fit, so we put them in the grid, and run the whole show again
             val newGrid = grid.add(firstOpenSquare, permutatedTile)
             // but first we remove the candidate
             val newCandidates = candidateTiles.filter { it.id != permutatedTile.id }
-            newFill(newGrid, newCandidates)
-        }
-    }
-}
-
-fun floodFill(grid: Grid, candidateTiles: List<Tile>) {
-    println("${candidateTiles.count()} remaining")
-
-    val open = grid.getFirstOpenCoordinate()
-    println(open)
-    if (open == null || candidateTiles.count() == 0) {
-        println(grid)
-        grid.getCornerValues()
-        System.out.flush()
-        return // the grid has been filled.
-    }
-    open.let { openSquare ->
-        val above = grid.getAbove(openSquare)
-        val left = grid.getLeft(openSquare)
-        // let's see if we can find a tile that matches here.
-        for (candidate in candidateTiles) {
-            val matches = candidate.matchesInNeighborhood(above, left)
-            // matches is the number of permutations which fit this place
-            for (workingMatch in matches) {
-                // recursively flood fill the rest with each working match (there shouldn't be too many?)
-                val newGrid = grid.add(openSquare, workingMatch)
-                val newCandidates = candidateTiles.filter { it.id != workingMatch.id }
-                floodFill(newGrid, newCandidates)
+            if (newFill(newGrid, newCandidates)) {
+                return true
             }
         }
-        if (candidateTiles.count() == 0) {
-            println("no matching candidate tiles at all. fuck?")
-        }
     }
+    return false
 }
 
 data class Vec2(val x: Int, val y: Int)
@@ -215,10 +198,14 @@ data class Grid(val content: Map<Vec2, Tile>) {
         return null
     }
 
-    fun getCornerValues() {
-        println(content[Vec2(0, 0)])
-        println(content[Vec2(0, length - 1)])
-        println(content[Vec2(length - 1, 0)])
-        println(content[Vec2(length - 1, length - 1)])
+    fun getCornerValues(): Long {
+        return listOf(
+            content[Vec2(0, 0)],
+            content[Vec2(0, length - 1)],
+            content[Vec2(length - 1, 0)],
+            content[Vec2(length - 1, length - 1)],
+        ).fold(1L) { acc, tile ->
+            acc * tile!!.id
+        }
     }
 }
